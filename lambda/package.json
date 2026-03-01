@@ -1,0 +1,8 @@
+{
+  "name": "civic-os-lambda",
+  "version": "1.0.0",
+  "dependencies": {
+    "aws-jwt-verify": "^4.0.1",
+    "pg": "^8.11.0"
+  }
+}
