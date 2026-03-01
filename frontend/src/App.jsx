@@ -306,8 +306,8 @@ function LandUseCasesPage({ authHeaders, isReadOnly }) {
                     <th>Address</th>
                     <th>Type</th>
                     <th>Status</th>
-                    <th>Submitted</th>
-                    <th>Acreage</th>
+                    <th className="col-date">Submitted</th>
+                    <th className="col-acreage">Acreage</th>
                     {!isReadOnly && <th></th>}
                   </tr>
                 </thead>
@@ -327,8 +327,8 @@ function LandUseCasesPage({ authHeaders, isReadOnly }) {
                           {c.status}
                         </span>
                       </td>
-                      <td>{formatDate(c.submitted_date)}</td>
-                      <td>{c.acreage ? `${c.acreage} ac` : '—'}</td>
+                      <td className="col-date">{formatDate(c.submitted_date)}</td>
+                      <td className="col-acreage">{c.acreage ? `${c.acreage} ac` : '—'}</td>
                       {!isReadOnly && (
                         <td onClick={e => e.stopPropagation()}>
                           <div style={{ display: 'flex', gap: 6 }}>
@@ -811,7 +811,7 @@ export default function App() {
   })
 
   const [activePage, setActivePage]   = useState('Dashboard')
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 640)
 
   const isSuper    = authSession?.role === 'super_admin'
   const isAdmin    = authSession?.role === 'tenant_admin' || isSuper
@@ -901,6 +901,9 @@ export default function App() {
 
   return (
     <div className={`shell ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+      {/* Mobile sidebar backdrop */}
+      <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
@@ -917,7 +920,10 @@ export default function App() {
             <div
               key={item.label}
               className={`nav-item ${activePage === item.label ? 'active' : ''}`}
-              onClick={() => setActivePage(item.label)}
+              onClick={() => {
+                setActivePage(item.label)
+                if (window.innerWidth <= 640) setSidebarOpen(false)
+              }}
               title={!sidebarOpen ? item.label : undefined}
             >
               <span className="nav-icon">{item.icon}</span>
@@ -929,7 +935,11 @@ export default function App() {
         {isSuper && (
           <div className="sidebar-footer">
             {sidebarOpen && (
-              <button className="btn-switch" onClick={() => { setCurrentTenant(null); localStorage.removeItem('civicos_tenant') }}>
+              <button className="btn-switch" onClick={() => {
+                setCurrentTenant(null)
+                localStorage.removeItem('civicos_tenant')
+                if (window.innerWidth <= 640) setSidebarOpen(false)
+              }}>
                 ⇄ Switch City
               </button>
             )}
@@ -941,6 +951,9 @@ export default function App() {
       <div className="main">
         {/* Topbar */}
         <header className="topbar">
+          <button className="hamburger-btn" onClick={() => setSidebarOpen(o => !o)} aria-label="Toggle navigation">
+            ☰
+          </button>
           <div className="topbar-left">
             <span className="topbar-city">{currentTenant.name}</span>
             {currentTenant.city && (
